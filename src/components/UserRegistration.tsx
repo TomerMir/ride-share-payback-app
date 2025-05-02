@@ -7,7 +7,7 @@ import { useRideShare } from '@/context/RideShareContext';
 import { UserIcon } from 'lucide-react';
 
 const UserRegistration = () => {
-  const { users, addUser, currentUser, setCurrentUser } = useRideShare();
+  const { users, addUser, currentUser, updateCurrentUser } = useRideShare();
   const [name, setName] = useState('');
 
   const handleAddUser = () => {
@@ -61,7 +61,7 @@ const UserRegistration = () => {
                   className={`
                     ${currentUser?.id === user.id ? 'bg-ride-blue hover:bg-ride-darkBlue' : ''}
                   `}
-                  onClick={() => setCurrentUser(user.id)}
+                  onClick={() => updateCurrentUser(user.id)}
                 >
                   {user.name}
                 </Button>

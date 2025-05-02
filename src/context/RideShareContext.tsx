@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
@@ -34,7 +33,7 @@ type RideShareContextType = {
   debts: Debt[];
   addUser: (name: string) => void;
   addRide: (driverId: string, passengers: string[], distance: number) => void;
-  setCurrentUser: (userId: string) => void;
+  updateCurrentUser: (userId: string) => void;
   setPricePerKm: (price: number) => void;
   calculateDebts: () => void;
   settleDebts: () => void;
@@ -117,7 +116,8 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     toast.success(`${name} joined the ride group!`);
   };
 
-  const setCurrentUser = (userId: string) => {
+  // Renamed from setCurrentUser to updateCurrentUser to avoid conflict
+  const updateCurrentUser = (userId: string) => {
     const user = users.find(u => u.id === userId);
     if (user) {
       setCurrentUser(user);
@@ -296,7 +296,7 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         debts,
         addUser,
         addRide,
-        setCurrentUser,
+        updateCurrentUser,
         setPricePerKm,
         calculateDebts,
         settleDebts,
