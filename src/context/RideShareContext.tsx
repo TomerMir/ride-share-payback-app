@@ -33,6 +33,7 @@ type RideShareContextType = {
   currentUser: User | null;
   debts: Debt[];
   addUser: (name: string) => void;
+  deleteUser: (userId: string) => void;
   addRide: (driverId: string, passengers: string[], distance: number) => void;
   updateCurrentUser: (userId: string) => void;
   setPricePerKm: (price: number) => void;
@@ -117,6 +118,39 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
     
     toast.success(`${name} joined the ride group!`);
+  };
+
+  const deleteUser = (userId: string) => {
+    // Check if user exists
+    const userToDelete = users.find(user => user.id === userId);
+    if (!userToDelete) {
+      toast.error('User not found');
+      return;
+    }
+
+    // Update current user if it's the one being deleted
+    if (currentUser && currentUser.id === userId) {
+      setCurrentUser(users.length > 1 ? users.find(user => user.id !== userId) || null : null);
+    }
+
+    // Remove user from users list
+    setUsers(prev => prev.filter(user => user.id !== userId));
+    
+    // Remove rides where the user was the driver
+    setRides(prev => prev.filter(ride => ride.driverId !== userId));
+    
+    // Remove user from passengers in existing rides
+    setRides(prev => prev.map(ride => ({
+      ...ride,
+      passengers: ride.passengers.filter(passengerId => passengerId !== userId)
+    })));
+    
+    // Remove any debts associated with this user
+    setDebts(prev => prev.filter(debt => 
+      debt.fromUserId !== userId && debt.toUserId !== userId
+    ));
+
+    toast.success(`${userToDelete.name} has been removed from the group`);
   };
 
   // Renamed from setCurrentUser to updateCurrentUser to avoid conflict
@@ -312,6 +346,7 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         currentUser,
         debts,
         addUser,
+        deleteUser,
         addRide,
         updateCurrentUser,
         setPricePerKm,

@@ -4,10 +4,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRideShare } from '@/context/RideShareContext';
-import { UserIcon } from 'lucide-react';
+import { UserIcon, UserMinus } from 'lucide-react';
 
 const UserRegistration = () => {
-  const { users, addUser, currentUser, updateCurrentUser } = useRideShare();
+  const { users, addUser, deleteUser, currentUser, updateCurrentUser } = useRideShare();
   const [name, setName] = useState('');
 
   const handleAddUser = () => {
@@ -55,16 +55,26 @@ const UserRegistration = () => {
             <h3 className="text-sm font-medium mb-2">Friends in this group:</h3>
             <div className="flex flex-wrap gap-2">
               {users.map((user) => (
-                <Button
-                  key={user.id}
-                  variant={currentUser?.id === user.id ? "default" : "outline"}
-                  className={`
-                    ${currentUser?.id === user.id ? 'bg-ride-blue hover:bg-ride-darkBlue' : ''}
-                  `}
-                  onClick={() => updateCurrentUser(user.id)}
-                >
-                  {user.name}
-                </Button>
+                <div key={user.id} className="flex items-center gap-1">
+                  <Button
+                    variant={currentUser?.id === user.id ? "default" : "outline"}
+                    className={`
+                      ${currentUser?.id === user.id ? 'bg-ride-blue hover:bg-ride-darkBlue' : ''}
+                    `}
+                    onClick={() => updateCurrentUser(user.id)}
+                  >
+                    {user.name}
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    size="icon" 
+                    className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                    onClick={() => deleteUser(user.id)}
+                    title="Remove user"
+                  >
+                    <UserMinus className="h-4 w-4" />
+                  </Button>
+                </div>
               ))}
             </div>
           </div>
