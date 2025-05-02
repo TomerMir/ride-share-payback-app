@@ -20,6 +20,9 @@ const RideForm = () => {
   useEffect(() => {
     if (driverId) {
       setDistance(settings.defaultDistance.toString());
+      
+      // Remove driver from selected passengers when driver changes
+      setSelectedPassengers(prev => prev.filter(id => id !== driverId));
     }
   }, [driverId, settings.defaultDistance]);
 
@@ -48,6 +51,12 @@ const RideForm = () => {
   };
 
   const togglePassenger = (userId: string) => {
+    // Prevent toggling if the selected user is the current driver
+    if (userId === driverId) {
+      toast.error('Driver cannot be a passenger in the same ride');
+      return;
+    }
+    
     setSelectedPassengers(prev => 
       prev.includes(userId)
         ? prev.filter(id => id !== userId)
@@ -55,6 +64,7 @@ const RideForm = () => {
     );
   };
 
+  // Only show users who aren't the driver as potential passengers
   const filteredPassengers = users.filter(user => user.id !== driverId);
 
   return (
@@ -73,7 +83,9 @@ const RideForm = () => {
           <div>
             <Label htmlFor="driver">Driver</Label>
             <Select 
-              onValueChange={setDriverId} 
+              onValueChange={(value) => {
+                setDriverId(value);
+              }} 
               value={driverId}
             >
               <SelectTrigger id="driver">
