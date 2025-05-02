@@ -8,8 +8,13 @@ import { DollarSign, Route } from 'lucide-react';
 
 const GasSettings = () => {
   const { settings, setPricePerKm, setDefaultDistance } = useRideShare();
-  const [priceInput, setPriceInput] = useState(settings.pricePerKm.toString());
-  const [distanceInput, setDistanceInput] = useState(settings.defaultDistance.toString());
+  
+  // Ensure we have default values if settings properties are undefined
+  const defaultPricePerKm = settings?.pricePerKm || 1.0;
+  const defaultDistance = settings?.defaultDistance || 10.0;
+  
+  const [priceInput, setPriceInput] = useState(defaultPricePerKm.toString());
+  const [distanceInput, setDistanceInput] = useState(defaultDistance.toString());
 
   const handleSavePrice = () => {
     const price = parseFloat(priceInput);
@@ -64,7 +69,7 @@ const GasSettings = () => {
             </Button>
           </div>
           <div className="mt-2 text-sm text-muted-foreground">
-            Current price: <span className="font-medium text-foreground">{settings.pricePerKm.toFixed(2)} ₪/km</span>
+            Current price: <span className="font-medium text-foreground">{defaultPricePerKm.toFixed(2)} ₪/km</span>
           </div>
         </div>
 
@@ -92,7 +97,7 @@ const GasSettings = () => {
             </Button>
           </div>
           <div className="mt-2 text-sm text-muted-foreground">
-            Current default: <span className="font-medium text-foreground">{settings.defaultDistance.toFixed(1)} km</span>
+            Current default: <span className="font-medium text-foreground">{defaultDistance.toFixed(1)} km</span>
           </div>
         </div>
       </CardContent>
