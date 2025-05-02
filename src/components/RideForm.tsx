@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,10 +11,17 @@ import { toast } from 'sonner';
 import { Users } from 'lucide-react';
 
 const RideForm = () => {
-  const { users, addRide } = useRideShare();
+  const { users, settings, addRide } = useRideShare();
   const [driverId, setDriverId] = useState('');
   const [distance, setDistance] = useState('');
   const [selectedPassengers, setSelectedPassengers] = useState<string[]>([]);
+
+  // Set default distance when driver is selected or default distance changes
+  useEffect(() => {
+    if (driverId) {
+      setDistance(settings.defaultDistance.toString());
+    }
+  }, [driverId, settings.defaultDistance]);
 
   const handleAddRide = () => {
     if (!driverId) {
@@ -36,7 +43,7 @@ const RideForm = () => {
     addRide(driverId, selectedPassengers, parsedDistance);
     
     // Reset form
-    setDistance('');
+    setDistance(settings.defaultDistance.toString());
     setSelectedPassengers([]);
   };
 

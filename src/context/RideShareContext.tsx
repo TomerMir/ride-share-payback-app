@@ -23,6 +23,7 @@ export type Debt = {
 
 type SettingsType = {
   pricePerKm: number;
+  defaultDistance: number;
 };
 
 type RideShareContextType = {
@@ -35,12 +36,14 @@ type RideShareContextType = {
   addRide: (driverId: string, passengers: string[], distance: number) => void;
   updateCurrentUser: (userId: string) => void;
   setPricePerKm: (price: number) => void;
+  setDefaultDistance: (distance: number) => void;
   calculateDebts: () => void;
   settleDebts: () => void;
 };
 
 const defaultSettings: SettingsType = {
   pricePerKm: 1.0, // Default price per km in shekels
+  defaultDistance: 10.0, // Default ride distance in km
 };
 
 const RideShareContext = createContext<RideShareContextType | undefined>(undefined);
@@ -136,6 +139,20 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }));
     
     toast.success(`Gas price updated to ${price.toFixed(2)} ₪/km`);
+  };
+
+  const setDefaultDistance = (distance: number) => {
+    if (distance <= 0) {
+      toast.error('Default distance must be greater than 0');
+      return;
+    }
+    
+    setSettings(prev => ({
+      ...prev,
+      defaultDistance: distance,
+    }));
+    
+    toast.success(`Default ride distance set to ${distance.toFixed(1)} km`);
   };
 
   const addRide = (driverId: string, passengers: string[], distance: number) => {
@@ -298,6 +315,7 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         addRide,
         updateCurrentUser,
         setPricePerKm,
+        setDefaultDistance,
         calculateDebts,
         settleDebts,
       }}

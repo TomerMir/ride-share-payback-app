@@ -13,7 +13,7 @@ const Index = () => {
       <div className="min-h-screen bg-gray-50">
         <header className="bg-ride-blue text-white py-4 px-6 shadow-md">
           <div className="container mx-auto">
-            <h1 className="text-2xl font-bold">RideShare Payback</h1>
+            <h1 className="text-2xl font-bold">Same Hour Tomorrow</h1>
             <p className="text-sm opacity-80">Track rides and split costs fairly</p>
           </div>
         </header>
@@ -43,7 +43,7 @@ const Index = () => {
         
         <footer className="bg-gray-100 border-t py-6 mt-8">
           <div className="container mx-auto text-center text-gray-500 text-sm">
-            &copy; {new Date().getFullYear()} RideShare Payback | Made with love
+            &copy; {new Date().getFullYear()} Same Hour Tomorrow | Made with love
           </div>
         </footer>
       </div>

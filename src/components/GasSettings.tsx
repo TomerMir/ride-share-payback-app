@@ -4,11 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRideShare } from '@/context/RideShareContext';
-import { DollarSign } from 'lucide-react';
+import { DollarSign, Route } from 'lucide-react';
 
 const GasSettings = () => {
-  const { settings, setPricePerKm } = useRideShare();
+  const { settings, setPricePerKm, setDefaultDistance } = useRideShare();
   const [priceInput, setPriceInput] = useState(settings.pricePerKm.toString());
+  const [distanceInput, setDistanceInput] = useState(settings.defaultDistance.toString());
 
   const handleSavePrice = () => {
     const price = parseFloat(priceInput);
@@ -17,9 +18,16 @@ const GasSettings = () => {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleSaveDistance = () => {
+    const distance = parseFloat(distanceInput);
+    if (!isNaN(distance) && distance > 0) {
+      setDefaultDistance(distance);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, saveFunction: () => void) => {
     if (e.key === 'Enter') {
-      handleSavePrice();
+      saveFunction();
     }
   };
 
@@ -28,34 +36,64 @@ const GasSettings = () => {
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-ride-blue flex items-center gap-2">
           <DollarSign className="h-6 w-6" />
-          Gas Price Settings
+          Settings
         </CardTitle>
         <CardDescription>
-          Set the current gas price per kilometer
+          Set gas price and default ride distance
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-2">
-          <Input
-            type="number"
-            min="0.01"
-            step="0.01"
-            placeholder="Price per km"
-            value={priceInput}
-            onChange={(e) => setPriceInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-          <span className="text-md whitespace-nowrap">₪/km</span>
-          <Button 
-            onClick={handleSavePrice}
-            className="bg-ride-blue hover:bg-ride-darkBlue"
-          >
-            Save
-          </Button>
+      <CardContent className="space-y-6">
+        <div>
+          <h3 className="text-sm font-medium mb-2">Gas Price Settings</h3>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              min="0.01"
+              step="0.01"
+              placeholder="Price per km"
+              value={priceInput}
+              onChange={(e) => setPriceInput(e.target.value)}
+              onKeyDown={(e) => handleKeyDown(e, handleSavePrice)}
+            />
+            <span className="text-md whitespace-nowrap">₪/km</span>
+            <Button 
+              onClick={handleSavePrice}
+              className="bg-ride-blue hover:bg-ride-darkBlue"
+            >
+              Save
+            </Button>
+          </div>
+          <div className="mt-2 text-sm text-muted-foreground">
+            Current price: <span className="font-medium text-foreground">{settings.pricePerKm.toFixed(2)} ₪/km</span>
+          </div>
         </div>
-        
-        <div className="mt-4 text-sm text-muted-foreground">
-          Current price: <span className="font-medium text-foreground">{settings.pricePerKm.toFixed(2)} ₪/km</span>
+
+        <div>
+          <h3 className="text-sm font-medium mb-2 flex items-center gap-1">
+            <Route className="h-4 w-4" />
+            Default Distance
+          </h3>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              min="0.1"
+              step="0.1"
+              placeholder="Default distance"
+              value={distanceInput}
+              onChange={(e) => setDistanceInput(e.target.value)}
+              onKeyDown={(e) => handleKeyDown(e, handleSaveDistance)}
+            />
+            <span className="text-md whitespace-nowrap">km</span>
+            <Button 
+              onClick={handleSaveDistance}
+              className="bg-ride-green hover:bg-green-600"
+            >
+              Save
+            </Button>
+          </div>
+          <div className="mt-2 text-sm text-muted-foreground">
+            Current default: <span className="font-medium text-foreground">{settings.defaultDistance.toFixed(1)} km</span>
+          </div>
         </div>
       </CardContent>
     </Card>
