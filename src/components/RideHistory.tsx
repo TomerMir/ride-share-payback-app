@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useRideShare, Ride, User } from '@/context/RideShareContext';
+import { useRideShare } from '@/context/RideShareContext';
+import { Ride, User } from '@/types/rideShare';
 import { format } from 'date-fns';
 
 const RideHistory = () => {
