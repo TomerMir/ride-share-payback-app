@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/data';
+// API URL - make configurable for different environments
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/data';
 
 export function useServerStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {
   const [storedValue, setStoredValue] = useState<T>(initialValue);
@@ -13,12 +14,15 @@ export function useServerStorage<T>(key: string, initialValue: T): [T, (value: T
     const fetchData = async () => {
       try {
         setIsLoading(true);
+        console.log(`Fetching ${key} from server...`);
         const response = await axios.get(`${API_URL}/${key}`);
         if (response.data) {
           setStoredValue(response.data as T);
+          console.log(`Received ${key} data:`, response.data);
         }
       } catch (error) {
         console.error(`Error fetching ${key} from server:`, error);
+        // Fall back to initial value if server fetch fails
       } finally {
         setIsLoading(false);
       }
@@ -34,11 +38,18 @@ export function useServerStorage<T>(key: string, initialValue: T): [T, (value: T
       const valueToStore = value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);
       
+      console.log(`Updating ${key} on server with:`, valueToStore);
+      
       // Update server state
       axios.post(`${API_URL}/${key}`, valueToStore)
-        .catch(error => console.error(`Error updating ${key} on server:`, error));
+        .then(response => {
+          console.log(`Successfully updated ${key} on server:`, response.data);
+        })
+        .catch(error => {
+          console.error(`Error updating ${key} on server:`, error);
+        });
     } catch (error) {
-      console.error(`Error updating ${key}:`, error);
+      console.error(`Error in setValue for ${key}:`, error);
     }
   };
 

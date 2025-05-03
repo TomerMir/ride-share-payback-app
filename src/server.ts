@@ -10,7 +10,13 @@ initStorage().catch(console.error);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// Configure CORS to allow requests from the client
+app.use(cors({
+  origin: '*', // Allow requests from any origin
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
+}));
+
 app.use(bodyParser.json());
 
 // API endpoint to get all data
@@ -18,6 +24,7 @@ app.get('/api/data', async (req, res) => {
   try {
     const data = await readData();
     res.json(data);
+    console.log('Sent all data to client');
   } catch (error) {
     console.error('Error reading data:', error);
     res.status(500).json({ error: 'Failed to read data' });
@@ -31,11 +38,13 @@ app.get('/api/data/:key', async (req, res) => {
     const key = req.params.key as keyof StoredData;
     if (key in data) {
       res.json(data[key]);
+      console.log(`Sent ${key} data to client:`, data[key]);
     } else {
+      console.log(`Key ${key} not found`);
       res.status(404).json({ error: 'Key not found' });
     }
   } catch (error) {
-    console.error('Error reading data:', error);
+    console.error(`Error reading ${req.params.key} data:`, error);
     res.status(500).json({ error: 'Failed to read data' });
   }
 });
@@ -45,18 +54,26 @@ app.post('/api/data/:key', async (req, res) => {
   try {
     const key = req.params.key as keyof StoredData;
     const value = req.body;
-    const data = await readData();
     
+    console.log(`Updating ${key} with:`, value);
+    
+    const data = await readData();
     data[key] = value;
     await writeData(data);
     
     res.json({ success: true, message: `${key} updated successfully` });
   } catch (error) {
-    console.error('Error updating data:', error);
+    console.error(`Error updating ${req.params.key}:`, error);
     res.status(500).json({ error: 'Failed to update data' });
   }
 });
 
+// Simple health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`API available at http://localhost:${PORT}/api/data`);
 });
