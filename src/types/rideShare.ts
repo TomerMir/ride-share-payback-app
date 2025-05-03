@@ -26,7 +26,7 @@ export type SettingsType = {
 
 export const defaultSettings: SettingsType = {
   pricePerKm: 1.0, // Default price per km in shekels
-  defaultDistance: 10.0, // Default ride distance in km
+  defaultDistance: 30.0, // Default ride distance in km
 };
 
 export type RideShareContextType = {
