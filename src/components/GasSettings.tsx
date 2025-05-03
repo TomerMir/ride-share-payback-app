@@ -11,7 +11,7 @@ const GasSettings = () => {
   
   // Ensure we have default values if settings properties are undefined
   const defaultPricePerKm = settings?.pricePerKm || 1.0;
-  const defaultDistance = settings?.defaultDistance || 10.0;
+  const defaultDistance = settings?.defaultDistance || 30.0;
   
   const [priceInput, setPriceInput] = useState(defaultPricePerKm.toString());
   const [distanceInput, setDistanceInput] = useState(defaultDistance.toString());
