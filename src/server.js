@@ -1,8 +1,38 @@
-
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import { readData, writeData, initStorage, StoredData } from './utils/serverStorage';
+import fs from 'fs/promises';
+import path from 'path';
+
+// Storage utility functions
+const STORAGE_FILE = path.resolve('./data.json');
+
+async function initStorage() {
+  try {
+    await fs.access(STORAGE_FILE);
+  } catch {
+    await fs.writeFile(STORAGE_FILE, JSON.stringify({}));
+  }
+}
+
+async function readData() {
+  try {
+    const data = await fs.readFile(STORAGE_FILE, 'utf-8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error reading storage file:', error);
+    throw error;
+  }
+}
+
+async function writeData(data) {
+  try {
+    await fs.writeFile(STORAGE_FILE, JSON.stringify(data, null, 2));
+  } catch (error) {
+    console.error('Error writing to storage file:', error);
+    throw error;
+  }
+}
 
 // Initialize the storage
 initStorage().catch(console.error);
@@ -35,7 +65,7 @@ app.get('/api/data', async (req, res) => {
 app.get('/api/data/:key', async (req, res) => {
   try {
     const data = await readData();
-    const key = req.params.key as keyof StoredData;
+    const key = req.params.key;
     if (key in data) {
       res.json(data[key]);
       console.log(`Sent ${key} data to client:`, data[key]);
@@ -52,7 +82,7 @@ app.get('/api/data/:key', async (req, res) => {
 // API endpoint to update specific data by key
 app.post('/api/data/:key', async (req, res) => {
   try {
-    const key = req.params.key as keyof StoredData;
+    const key = req.params.key;
     const value = req.body;
     
     console.log(`Updating ${key} with:`, value);
