@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 // API URL - make configurable for different environments
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/data';
+const API_URL = import.meta.env.VITE_API_URL || 'http://34.44.44.80:5000/api/data';
 
 export function useServerStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {
   const [storedValue, setStoredValue] = useState<T>(initialValue);
