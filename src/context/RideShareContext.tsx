@@ -1,5 +1,4 @@
-
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { 
   User, 
@@ -10,6 +9,7 @@ import {
   RideShareContextType 
 } from '../types/rideShare';
 import { calculateRawDebts, simplifyDebts } from '../utils/debtCalculation';
+import { useServerStorage } from '../hooks/useServerStorage';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
 const RideShareContext = createContext<RideShareContextType | undefined>(undefined);
@@ -23,12 +23,28 @@ export const useRideShare = () => {
 };
 
 export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [users, setUsers] = useLocalStorage<User[]>('rideShareUsers', []);
-  const [rides, setRides] = useLocalStorage<Ride[]>('rideShareRides', []);
-  const [settings, setSettings] = useLocalStorage<SettingsType>('rideShareSettings', defaultSettings);
+  // Use server storage for shared state
+  const [users, setUsers] = useServerStorage<User[]>('users', []);
+  const [rides, setRides] = useServerStorage<Ride[]>('rides', []);
+  const [settings, setSettings] = useServerStorage<SettingsType>('settings', defaultSettings);
+  
+  // Keep current user in local storage (this is user-specific)
   const [currentUser, setCurrentUser] = useLocalStorage<User | null>('rideShareCurrentUser', null);
+  
   const [debts, setDebts] = useState<Debt[]>([]);
   const [rawDebts, setRawDebts] = useState<Debt[]>([]);
+
+  // Effect to ensure current user is valid based on available users
+  useEffect(() => {
+    if (currentUser && users.length > 0) {
+      const userExists = users.some(user => user.id === currentUser.id);
+      if (!userExists && users.length > 0) {
+        setCurrentUser(users[0]);
+      }
+    } else if (!currentUser && users.length > 0) {
+      setCurrentUser(users[0]);
+    }
+  }, [users, currentUser]);
 
   const addUser = (name: string) => {
     if (!name.trim()) {
