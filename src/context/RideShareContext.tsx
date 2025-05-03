@@ -32,6 +32,7 @@ type RideShareContextType = {
   settings: SettingsType;
   currentUser: User | null;
   debts: Debt[];
+  rawDebts: Debt[];
   addUser: (name: string) => void;
   deleteUser: (userId: string) => void;
   addRide: (driverId: string, passengers: string[], distance: number) => void;
@@ -79,6 +80,7 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   });
 
   const [debts, setDebts] = useState<Debt[]>([]);
+  const [rawDebts, setRawDebts] = useState<Debt[]>([]);
 
   // Save to localStorage whenever states change
   useEffect(() => {
@@ -217,19 +219,9 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     toast.success('Ride added successfully!');
   };
 
-  // Calculate raw debts before optimization
+  // Calculate raw debts (direct debts from rides)
   const calculateRawDebts = (): Debt[] => {
-    const debts: Record<string, Record<string, number>> = {};
-    
-    // Initialize debt tracking
-    users.forEach(fromUser => {
-      debts[fromUser.id] = {};
-      users.forEach(toUser => {
-        if (fromUser.id !== toUser.id) {
-          debts[fromUser.id][toUser.id] = 0;
-        }
-      });
-    });
+    const rawDebts: Debt[] = [];
     
     // Calculate debts from rides
     rides.forEach(ride => {
@@ -240,26 +232,15 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       
       // Each passenger owes the driver
       ride.passengers.forEach(passengerId => {
-        debts[passengerId][driver] = (debts[passengerId][driver] || 0) + costPerPerson;
+        rawDebts.push({
+          fromUserId: passengerId,
+          toUserId: driver,
+          amount: parseFloat(costPerPerson.toFixed(2)), // Round to 2 decimal places
+        });
       });
     });
     
-    // Convert to array format
-    const debtArray: Debt[] = [];
-    
-    Object.entries(debts).forEach(([fromUserId, toUsers]) => {
-      Object.entries(toUsers).forEach(([toUserId, amount]) => {
-        if (amount > 0) {
-          debtArray.push({
-            fromUserId,
-            toUserId,
-            amount: parseFloat(amount.toFixed(2)), // Round to 2 decimal places
-          });
-        }
-      });
-    });
-    
-    return debtArray;
+    return rawDebts;
   };
 
   // Simplify the debts to minimize transactions
@@ -281,47 +262,46 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // Separate users who owe money (negative balance) and users who are owed money (positive balance)
     const debtors = Object.entries(netBalances)
       .filter(([_, balance]) => balance < 0)
-      .map(([id, balance]) => ({ id, balance: Math.abs(balance) }))
-      .sort((a, b) => b.balance - a.balance);
+      .map(([id, balance]) => ({ id, balance: Math.abs(balance) }));
       
     const creditors = Object.entries(netBalances)
       .filter(([_, balance]) => balance > 0)
-      .map(([id, balance]) => ({ id, balance }))
-      .sort((a, b) => b.balance - a.balance);
+      .map(([id, balance]) => ({ id, balance }));
     
     const optimizedDebts: Debt[] = [];
     
-    // Match debtors with creditors to create simplified transactions
-    let debtorIndex = 0;
-    let creditorIndex = 0;
-    
-    while (debtorIndex < debtors.length && creditorIndex < creditors.length) {
-      const debtor = debtors[debtorIndex];
-      const creditor = creditors[creditorIndex];
+    // For each debtor
+    for (const debtor of debtors) {
+      let remainingDebt = parseFloat(debtor.balance.toFixed(2));
       
-      const amount = Math.min(debtor.balance, creditor.balance);
-      
-      if (amount > 0) {
-        optimizedDebts.push({
-          fromUserId: debtor.id,
-          toUserId: creditor.id,
-          amount: parseFloat(amount.toFixed(2)),
-        });
+      // Match with creditors until this debtor's debt is fully allocated
+      for (let i = 0; i < creditors.length && remainingDebt > 0; i++) {
+        const creditor = creditors[i];
+        if (creditor.balance <= 0) continue;
+        
+        const paymentAmount = Math.min(remainingDebt, creditor.balance);
+        
+        if (paymentAmount > 0) {
+          optimizedDebts.push({
+            fromUserId: debtor.id,
+            toUserId: creditor.id,
+            amount: parseFloat(paymentAmount.toFixed(2)),
+          });
+          
+          creditor.balance = parseFloat((creditor.balance - paymentAmount).toFixed(2));
+          remainingDebt = parseFloat((remainingDebt - paymentAmount).toFixed(2));
+        }
       }
-      
-      debtor.balance -= amount;
-      creditor.balance -= amount;
-      
-      if (debtor.balance < 0.01) debtorIndex++;
-      if (creditor.balance < 0.01) creditorIndex++;
     }
     
     return optimizedDebts;
   };
 
   const calculateDebts = () => {
-    const rawDebts = calculateRawDebts();
-    const optimizedDebts = simplifyDebts(rawDebts);
+    const calculatedRawDebts = calculateRawDebts();
+    setRawDebts(calculatedRawDebts);
+    
+    const optimizedDebts = simplifyDebts(calculatedRawDebts);
     setDebts(optimizedDebts);
   };
 
@@ -334,6 +314,7 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // Clear rides after settlement
     setRides([]);
     setDebts([]);
+    setRawDebts([]);
     toast.success('All debts have been settled!');
   };
 
@@ -345,6 +326,7 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         settings,
         currentUser,
         debts,
+        rawDebts,
         addUser,
         deleteUser,
         addRide,

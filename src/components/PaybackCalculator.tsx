@@ -1,12 +1,21 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRideShare } from '@/context/RideShareContext';
 import { Wallet } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const PaybackCalculator = () => {
-  const { users, rides, debts, calculateDebts, settleDebts } = useRideShare();
+  const { users, rides, debts, calculateDebts, settleDebts, rawDebts } = useRideShare();
+  const [showRawDebts, setShowRawDebts] = useState(false);
 
   const getUserName = (id: string): string => {
     const user = users.find(u => u.id === id);
@@ -19,6 +28,10 @@ const PaybackCalculator = () => {
 
   const handleSettleDebts = () => {
     settleDebts();
+  };
+
+  const toggleDebtView = () => {
+    setShowRawDebts(!showRawDebts);
   };
 
   return (
@@ -53,8 +66,42 @@ const PaybackCalculator = () => {
         ) : (
           <div className="space-y-6">
             <div>
-              <h3 className="font-medium mb-4">Payment Summary:</h3>
-              {debts.length > 0 ? (
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-medium">Payment Summary:</h3>
+                {rawDebts && rawDebts.length > 0 && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={toggleDebtView} 
+                    className="text-xs"
+                  >
+                    {showRawDebts ? "Show Simplified" : "Show Raw Debts"}
+                  </Button>
+                )}
+              </div>
+
+              {showRawDebts && rawDebts && rawDebts.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>From</TableHead>
+                      <TableHead>To</TableHead>
+                      <TableHead className="text-right">Amount (₪)</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rawDebts.map((debt, index) => (
+                      <TableRow key={`raw-${index}`}>
+                        <TableCell>{getUserName(debt.fromUserId)}</TableCell>
+                        <TableCell>{getUserName(debt.toUserId)}</TableCell>
+                        <TableCell className="text-right font-medium text-ride-green">
+                          {debt.amount.toFixed(2)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : debts.length > 0 ? (
                 <div className="space-y-2">
                   {debts.map((debt, index) => (
                     <div key={index} className="bg-muted/30 rounded-md p-3 flex justify-between items-center">
