@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -26,6 +27,7 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Use server storage for shared state
   const [users, setUsers] = useServerStorage<User[]>('users', []);
   const [rides, setRides] = useServerStorage<Ride[]>('rides', []);
+  const [historicRides, setHistoricRides] = useServerStorage<Ride[]>('historicRides', []);
   const [settings, setSettings] = useServerStorage<SettingsType>('settings', defaultSettings);
   
   // Keep current user in local storage (this is user-specific)
@@ -121,6 +123,34 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     toast.success(`Gas price updated to ${price.toFixed(2)} ₪/km`);
   };
 
+  const setDriverPricePerKm = (userId: string, price: number) => {
+    if (price <= 0) {
+      toast.error('Price must be greater than 0');
+      return;
+    }
+
+    const user = users.find(u => u.id === userId);
+    if (!user) {
+      toast.error('User not found');
+      return;
+    }
+
+    setUsers(prev => 
+      prev.map(u => 
+        u.id === userId 
+          ? { ...u, pricePerKm: price } 
+          : u
+      )
+    );
+    
+    // Update current user if it's the one being modified
+    if (currentUser && currentUser.id === userId) {
+      setCurrentUser({ ...currentUser, pricePerKm: price });
+    }
+    
+    toast.success(`${user.name}'s gas price updated to ${price.toFixed(2)} ₪/km`);
+  };
+
   const setDefaultDistance = (distance: number) => {
     if (distance <= 0) {
       toast.error('Default distance must be greater than 0');
@@ -164,7 +194,7 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const calculateDebts = () => {
-    const calculatedRawDebts = calculateRawDebts(rides, settings.pricePerKm);
+    const calculatedRawDebts = calculateRawDebts(rides, settings.pricePerKm, users);
     setRawDebts(calculatedRawDebts);
     
     const optimizedDebts = simplifyDebts(calculatedRawDebts, users);
@@ -177,7 +207,10 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       return;
     }
     
-    // Clear rides after settlement
+    // Move current rides to historic rides
+    setHistoricRides(prev => [...prev, ...rides]);
+    
+    // Clear current rides after settlement
     setRides([]);
     setDebts([]);
     setRawDebts([]);
@@ -189,6 +222,7 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       value={{
         users,
         rides,
+        historicRides,
         settings,
         currentUser,
         debts,
@@ -199,6 +233,7 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         updateCurrentUser,
         setPricePerKm,
         setDefaultDistance,
+        setDriverPricePerKm,
         calculateDebts,
         settleDebts,
       }}

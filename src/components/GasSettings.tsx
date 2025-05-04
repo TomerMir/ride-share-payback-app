@@ -1,13 +1,14 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRideShare } from '@/context/RideShareContext';
 import { DollarSign, Route } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const GasSettings = () => {
-  const { settings, setPricePerKm, setDefaultDistance } = useRideShare();
+  const { settings, setPricePerKm, setDefaultDistance, currentUser, users, updateCurrentUser, setDriverPricePerKm } = useRideShare();
   
   // Ensure we have default values if settings properties are undefined
   const defaultPricePerKm = settings?.pricePerKm || 1.0;
@@ -15,6 +16,16 @@ const GasSettings = () => {
   
   const [priceInput, setPriceInput] = useState(defaultPricePerKm.toString());
   const [distanceInput, setDistanceInput] = useState(defaultDistance.toString());
+  const [driverPriceInput, setDriverPriceInput] = useState('');
+
+  // Update driver price input when current user changes
+  useEffect(() => {
+    if (currentUser && currentUser.pricePerKm !== undefined) {
+      setDriverPriceInput(currentUser.pricePerKm.toString());
+    } else {
+      setDriverPriceInput(defaultPricePerKm.toString());
+    }
+  }, [currentUser, defaultPricePerKm]);
 
   const handleSavePrice = () => {
     const price = parseFloat(priceInput);
@@ -27,6 +38,15 @@ const GasSettings = () => {
     const distance = parseFloat(distanceInput);
     if (!isNaN(distance) && distance > 0) {
       setDefaultDistance(distance);
+    }
+  };
+
+  const handleSaveDriverPrice = () => {
+    if (currentUser) {
+      const price = parseFloat(driverPriceInput);
+      if (!isNaN(price) && price > 0) {
+        setDriverPricePerKm(currentUser.id, price);
+      }
     }
   };
 
@@ -48,8 +68,9 @@ const GasSettings = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Global Gas Price Settings */}
         <div>
-          <h3 className="text-sm font-medium mb-2">Gas Price Settings</h3>
+          <h3 className="text-sm font-medium mb-2">Global Gas Price</h3>
           <div className="flex items-center gap-2">
             <Input
               type="number"
@@ -69,11 +90,66 @@ const GasSettings = () => {
             </Button>
           </div>
           <div className="mt-2 text-sm text-muted-foreground">
-            Current price: <span className="font-medium text-foreground">{defaultPricePerKm.toFixed(2)} ₪/km</span>
+            Current global price: <span className="font-medium text-foreground">{defaultPricePerKm.toFixed(2)} ₪/km</span>
           </div>
         </div>
 
-        <div>
+        {/* Driver-specific Gas Price Settings */}
+        <div className="pt-2 border-t">
+          <h3 className="text-sm font-medium mb-2">Driver-specific Gas Price</h3>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm text-muted-foreground block mb-1">Select Driver</label>
+              <Select 
+                value={currentUser?.id} 
+                onValueChange={(value) => updateCurrentUser(value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a driver" />
+                </SelectTrigger>
+                <SelectContent>
+                  {users.map(user => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {currentUser && (
+              <div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    placeholder="Driver price per km"
+                    value={driverPriceInput}
+                    onChange={(e) => setDriverPriceInput(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, handleSaveDriverPrice)}
+                  />
+                  <span className="text-md whitespace-nowrap">₪/km</span>
+                  <Button 
+                    onClick={handleSaveDriverPrice}
+                    className="bg-ride-blue hover:bg-ride-darkBlue"
+                  >
+                    Save
+                  </Button>
+                </div>
+                <div className="mt-2 text-sm text-muted-foreground">
+                  {currentUser.name}'s price: <span className="font-medium text-foreground">
+                    {currentUser.pricePerKm !== undefined ? currentUser.pricePerKm.toFixed(2) : 'Using global price'} ₪/km
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Default Distance Settings */}
+        <div className="pt-2 border-t">
           <h3 className="text-sm font-medium mb-2 flex items-center gap-1">
             <Route className="h-4 w-4" />
             Default Distance

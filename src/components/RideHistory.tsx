@@ -16,7 +16,9 @@ const RideHistory = () => {
 
   // Calculate the total cost of a ride
   const calculateRideCost = (ride: Ride): number => {
-    return ride.distance * settings.pricePerKm;
+    const driverUser = users.find(u => u.id === ride.driverId);
+    const pricePerKm = driverUser?.pricePerKm ?? settings.pricePerKm;
+    return ride.distance * pricePerKm;
   };
 
   // Calculate cost per person for a ride
@@ -56,7 +58,7 @@ const RideHistory = () => {
                   <div>
                     <p className="font-medium">Driver: {getUserName(ride.driverId)}</p>
                     <p className="text-sm text-muted-foreground">
-                      {format(new Date(ride.date), 'PP')}
+                      {format(new Date(ride.date), 'PP')} at {format(new Date(ride.date), 'p')}
                     </p>
                   </div>
                   <div className="text-right">

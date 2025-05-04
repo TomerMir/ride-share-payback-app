@@ -6,6 +6,7 @@ import GasSettings from '@/components/GasSettings';
 import RideForm from '@/components/RideForm';
 import RideHistory from '@/components/RideHistory';
 import PaybackCalculator from '@/components/PaybackCalculator';
+import AllRidesHistory from '@/components/AllRidesHistory';
 
 const Index = () => {
   return (
@@ -20,23 +21,36 @@ const Index = () => {
         
         <main className="container mx-auto py-8 px-4">
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            <div className="md:col-span-2 lg:col-span-3">
-              <UserRegistration />
-            </div>
-            
+            {/* Log a Ride */}
             <div>
               <div className="grid gap-8">
-                <GasSettings />
                 <RideForm />
               </div>
             </div>
             
+            {/* Ride History */}
             <div>
               <RideHistory />
             </div>
             
+            {/* Payback Day */}
             <div>
               <PaybackCalculator />
+            </div>
+            
+            {/* Settings */}
+            <div>
+              <GasSettings />
+            </div>
+            
+            {/* Add New Friend */}
+            <div>
+              <UserRegistration />
+            </div>
+            
+            {/* All Rides History */}
+            <div className="md:col-span-2 lg:col-span-3">
+              <AllRidesHistory />
             </div>
           </div>
         </main>

@@ -8,13 +8,20 @@ export const calculateRawDebts = (
     passengers: string[];
     distance: number;
   }[],
-  pricePerKm: number
+  defaultPricePerKm: number,
+  users: User[]
 ): Debt[] => {
   const rawDebts: Debt[] = [];
   
   // Calculate debts from rides
   rides.forEach(ride => {
     const driver = ride.driverId;
+    // Use driver specific price if available, otherwise use default
+    const driverUser = users.find(user => user.id === driver);
+    const pricePerKm = driverUser?.pricePerKm !== undefined 
+      ? driverUser.pricePerKm 
+      : defaultPricePerKm;
+    
     const totalCost = ride.distance * pricePerKm;
     const peopleInRide = ride.passengers.length + 1; // +1 for the driver
     const costPerPerson = totalCost / peopleInRide;

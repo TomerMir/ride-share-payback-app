@@ -3,6 +3,7 @@
 export type User = {
   id: string;
   name: string;
+  pricePerKm?: number; // Driver-specific price per km
 };
 
 export type Ride = {
@@ -32,6 +33,7 @@ export const defaultSettings: SettingsType = {
 export type RideShareContextType = {
   users: User[];
   rides: Ride[];
+  historicRides: Ride[];
   settings: SettingsType;
   currentUser: User | null;
   debts: Debt[];
@@ -42,6 +44,7 @@ export type RideShareContextType = {
   updateCurrentUser: (userId: string) => void;
   setPricePerKm: (price: number) => void;
   setDefaultDistance: (distance: number) => void;
+  setDriverPricePerKm: (userId: string, price: number) => void;
   calculateDebts: () => void;
   settleDebts: () => void;
 };
