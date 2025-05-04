@@ -39,7 +39,6 @@ export type RideShareContextType = {
   debts: Debt[];
   rawDebts: Debt[];
   addUser: (name: string) => void;
-  deleteUser: (userId: string) => void;
   addRide: (driverId: string, passengers: string[], distance: number) => void;
   updateCurrentUser: (userId: string) => void;
   setPricePerKm: (price: number) => void;

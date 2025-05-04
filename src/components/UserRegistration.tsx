@@ -4,10 +4,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRideShare } from '@/context/RideShareContext';
-import { UserIcon, UserMinus } from 'lucide-react';
+import { UserIcon } from 'lucide-react';
 
 const UserRegistration = () => {
-  const { users, addUser, deleteUser, currentUser, updateCurrentUser } = useRideShare();
+  const { users, addUser, currentUser, updateCurrentUser } = useRideShare();
   const [name, setName] = useState('');
 
   const handleAddUser = () => {
@@ -64,15 +64,6 @@ const UserRegistration = () => {
                     onClick={() => updateCurrentUser(user.id)}
                   >
                     {user.name}
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    size="icon" 
-                    className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                    onClick={() => deleteUser(user.id)}
-                    title="Remove user"
-                  >
-                    <UserMinus className="h-4 w-4" />
                   </Button>
                 </div>
               ))}
