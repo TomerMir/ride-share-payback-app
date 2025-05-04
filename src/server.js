@@ -3,9 +3,11 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import fs from 'fs/promises';
 import path from 'path';
+import { Mutex } from 'async-mutex'; // Add this import for the mutex
 
 // Storage utility functions
 const STORAGE_FILE = path.resolve('./data.json');
+const mutex = new Mutex(); // Create a mutex instance
 
 async function initStorage() {
   try {
@@ -16,21 +18,27 @@ async function initStorage() {
 }
 
 async function readData() {
+  const release = await mutex.acquire(); // Acquire the mutex
   try {
     const data = await fs.readFile(STORAGE_FILE, 'utf-8');
     return JSON.parse(data);
   } catch (error) {
     console.error('Error reading storage file:', error);
     throw error;
+  } finally {
+    release(); // Release the mutex
   }
 }
 
 async function writeData(data) {
+  const release = await mutex.acquire(); // Acquire the mutex
   try {
     await fs.writeFile(STORAGE_FILE, JSON.stringify(data, null, 2));
   } catch (error) {
     console.error('Error writing to storage file:', error);
     throw error;
+  } finally {
+    release(); // Release the mutex
   }
 }
 
