@@ -25,6 +25,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     // Apply theme to document when component mounts or theme changes
     document.documentElement.classList.toggle('dark', theme === 'dark');
+    
+    // Add a smooth transition class to the document element
+    const htmlElement = document.documentElement;
+    if (!htmlElement.classList.contains('transition-colors')) {
+      htmlElement.classList.add('transition-colors', 'duration-300');
+    }
   }, [theme]);
 
   const toggleTheme = () => {
