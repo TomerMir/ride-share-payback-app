@@ -3,11 +3,10 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import fs from 'fs/promises';
 import path from 'path';
-import { Mutex } from 'async-mutex'; // Add this import for the mutex
+import { Mutex } from 'async-mutex';
 
 // Storage utility functions
 const STORAGE_FILE = path.resolve('./data.json');
-const mutex = new Mutex(); // Create a mutex instance
 
 async function initStorage() {
   try {
@@ -18,27 +17,21 @@ async function initStorage() {
 }
 
 async function readData() {
-  const release = await mutex.acquire(); // Acquire the mutex
   try {
     const data = await fs.readFile(STORAGE_FILE, 'utf-8');
     return JSON.parse(data);
   } catch (error) {
     console.error('Error reading storage file:', error);
     throw error;
-  } finally {
-    release(); // Release the mutex
   }
 }
 
 async function writeData(data) {
-  const release = await mutex.acquire(); // Acquire the mutex
   try {
     await fs.writeFile(STORAGE_FILE, JSON.stringify(data, null, 2));
   } catch (error) {
     console.error('Error writing to storage file:', error);
     throw error;
-  } finally {
-    release(); // Release the mutex
   }
 }
 
@@ -56,6 +49,8 @@ app.use(cors({
 }));
 
 app.use(bodyParser.json());
+
+const mutex = new Mutex();
 
 // API endpoint to get all data
 app.get('/api/data', async (req, res) => {
@@ -89,20 +84,23 @@ app.get('/api/data/:key', async (req, res) => {
 
 // API endpoint to update specific data by key
 app.post('/api/data/:key', async (req, res) => {
+  const release = await mutex.acquire(); // Acquire the mutex
   try {
     const key = req.params.key;
     const value = req.body;
-    
+
     console.log(`Updating ${key} with:`, value);
-    
+
     const data = await readData();
     data[key] = value;
     await writeData(data);
-    
+
     res.json({ success: true, message: `${key} updated successfully` });
   } catch (error) {
     console.error(`Error updating ${req.params.key}:`, error);
     res.status(500).json({ error: 'Failed to update data' });
+  } finally {
+    release(); // Release the mutex
   }
 });
 
