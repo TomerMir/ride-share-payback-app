@@ -37,19 +37,19 @@ const GasSettings = () => {
   };
 
   return (
-    <Card className="w-full dark:border-gray-700">
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-ride-blue dark:text-blue-400 flex items-center gap-2">
+        <CardTitle className="text-2xl font-bold text-ride-blue flex items-center gap-2">
           <DollarSign className="h-6 w-6" />
           Settings
         </CardTitle>
-        <CardDescription className="dark:text-gray-400">
+        <CardDescription>
           Set gas price and default ride distance
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
-          <h3 className="text-sm font-medium mb-2 dark:text-gray-300">Gas Price Settings</h3>
+          <h3 className="text-sm font-medium mb-2">Gas Price Settings</h3>
           <div className="flex items-center gap-2">
             <Input
               type="number"
@@ -59,9 +59,8 @@ const GasSettings = () => {
               value={priceInput}
               onChange={(e) => setPriceInput(e.target.value)}
               onKeyDown={(e) => handleKeyDown(e, handleSavePrice)}
-              className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             />
-            <span className="text-md whitespace-nowrap dark:text-gray-300">₪/km</span>
+            <span className="text-md whitespace-nowrap">₪/km</span>
             <Button 
               onClick={handleSavePrice}
               className="bg-ride-blue hover:bg-ride-darkBlue"
@@ -69,13 +68,13 @@ const GasSettings = () => {
               Save
             </Button>
           </div>
-          <div className="mt-2 text-sm text-muted-foreground dark:text-gray-400">
-            Current price: <span className="font-medium text-foreground dark:text-gray-300">{defaultPricePerKm.toFixed(2)} ₪/km</span>
+          <div className="mt-2 text-sm text-muted-foreground">
+            Current price: <span className="font-medium text-foreground">{defaultPricePerKm.toFixed(2)} ₪/km</span>
           </div>
         </div>
 
         <div>
-          <h3 className="text-sm font-medium mb-2 flex items-center gap-1 dark:text-gray-300">
+          <h3 className="text-sm font-medium mb-2 flex items-center gap-1">
             <Route className="h-4 w-4" />
             Default Distance
           </h3>
@@ -88,9 +87,8 @@ const GasSettings = () => {
               value={distanceInput}
               onChange={(e) => setDistanceInput(e.target.value)}
               onKeyDown={(e) => handleKeyDown(e, handleSaveDistance)}
-              className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             />
-            <span className="text-md whitespace-nowrap dark:text-gray-300">km</span>
+            <span className="text-md whitespace-nowrap">km</span>
             <Button 
               onClick={handleSaveDistance}
               className="bg-ride-green hover:bg-green-600"
@@ -98,8 +96,8 @@ const GasSettings = () => {
               Save
             </Button>
           </div>
-          <div className="mt-2 text-sm text-muted-foreground dark:text-gray-400">
-            Current default: <span className="font-medium text-foreground dark:text-gray-300">{defaultDistance.toFixed(1)} km</span>
+          <div className="mt-2 text-sm text-muted-foreground">
+            Current default: <span className="font-medium text-foreground">{defaultDistance.toFixed(1)} km</span>
           </div>
         </div>
       </CardContent>
