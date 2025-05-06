@@ -4,14 +4,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useRideShare } from '@/context/RideShareContext';
 import { format } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 const AllRidesHistory = () => {
-  const { historicRides, users } = useRideShare();
+  const { historicRides, users, unsettleRide } = useRideShare();
 
   // Get user name by ID
   const getUserName = (id: string): string => {
     const user = users.find(u => u.id === id);
     return user ? user.name : 'Unknown';
+  };
+
+  const handleUnsettleRide = (rideId: string) => {
+    unsettleRide(rideId);
   };
 
   if (historicRides.length === 0) {
@@ -45,6 +51,7 @@ const AllRidesHistory = () => {
                 <TableHead>Driver</TableHead>
                 <TableHead>Passengers</TableHead>
                 <TableHead className="text-right">Distance</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -58,6 +65,16 @@ const AllRidesHistory = () => {
                     {ride.passengers.map(id => getUserName(id)).join(', ')}
                   </TableCell>
                   <TableCell className="text-right">{ride.distance} km</TableCell>
+                  <TableCell className="text-right">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => handleUnsettleRide(ride.id)}
+                      title="Move back to active rides"
+                    >
+                      <ArrowLeft size={16} className="mr-1" /> Unsettle
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

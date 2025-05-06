@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -183,6 +184,31 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     toast.success('All debts have been settled!');
   };
 
+  // New function to move a ride from historic rides back to active rides
+  const unsettleRide = (rideId: string) => {
+    // Find the ride in historic rides
+    const rideToUnsettle = historicRides.find(ride => ride.id === rideId);
+    
+    if (!rideToUnsettle) {
+      toast.error('Ride not found');
+      return;
+    }
+    
+    // Add to active rides
+    setRides(prevRides => [...prevRides, rideToUnsettle]);
+    
+    // Remove from historic rides
+    setHistoricRides(prevHistoric => 
+      prevHistoric.filter(ride => ride.id !== rideId)
+    );
+    
+    toast.success('Ride moved back to active rides');
+    
+    // Reset debts calculation
+    setDebts([]);
+    setRawDebts([]);
+  };
+
   return (
     <RideShareContext.Provider
       value={{
@@ -201,6 +227,7 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setDriverPricePerKm,
         calculateDebts,
         settleDebts,
+        unsettleRide,
       }}
     >
       {children}

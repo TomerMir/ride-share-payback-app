@@ -46,4 +46,5 @@ export type RideShareContextType = {
   setDriverPricePerKm: (userId: string, price: number) => void;
   calculateDebts: () => void;
   settleDebts: () => void;
+  unsettleRide: (rideId: string) => void;
 };
