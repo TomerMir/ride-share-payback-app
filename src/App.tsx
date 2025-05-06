@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,7 +8,7 @@ import NotFound from "./pages/NotFound";
 import SecretRedirect from "./pages/SecretRedirect";
 
 // Secret path for the app - this would ideally come from an environment variable
-const SECRET_PATH = "secure-ride-share-2025";
+const SECRET_PATH = "super-secret-squirrel-ninja-unicorns-eating-tacos-while-coding";
 
 const queryClient = new QueryClient();
 
