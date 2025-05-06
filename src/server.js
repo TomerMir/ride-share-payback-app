@@ -1,4 +1,3 @@
-
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
@@ -8,9 +7,6 @@ import { Mutex } from 'async-mutex';
 
 // Storage utility functions
 const STORAGE_FILE = path.resolve('./data.json');
-
-// Secret access key for minimal authentication
-const SECRET_ACCESS_KEY = 'ridesecret'; // This will be part of the URL
 
 async function initStorage() {
   try {
@@ -55,28 +51,6 @@ app.use(cors({
 app.use(bodyParser.json());
 
 const mutex = new Mutex();
-
-// Middleware to check secret access key
-const checkSecretKey = (req, res, next) => {
-  // Skip auth check for API routes, we only authenticate the main app access
-  if (req.path.startsWith('/api/')) {
-    return next();
-  }
-  
-  // For all other routes (serving the frontend), check the secret
-  const urlKey = req.path.split('/')[1]; // Get the first part of the URL path
-  if (urlKey === SECRET_ACCESS_KEY) {
-    next(); // Allow access if the secret key matches
-  } else {
-    res.status(403).send('Access denied. Invalid access key.');
-  }
-};
-
-// Apply authentication middleware
-app.use(checkSecretKey);
-
-// Serve static files from the root path
-app.use(`/${SECRET_ACCESS_KEY}`, express.static('dist'));
 
 // API endpoint to get all data
 app.get('/api/data', async (req, res) => {
@@ -135,68 +109,7 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Catch-all route for the app to handle client-side routing
-app.get(`/${SECRET_ACCESS_KEY}/*`, (req, res) => {
-  res.sendFile(path.resolve('dist', 'index.html'));
-});
-
-// Redirect root to the secret URL path
-app.get('/', (req, res) => {
-  res.send(`
-    <html>
-      <head>
-        <title>Same Hour Tomorrow</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f5f5f5;
-          }
-          .container {
-            text-align: center;
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            max-width: 500px;
-            width: 100%;
-          }
-          h1 {
-            color: #3b82f6;
-          }
-          p {
-            margin: 1rem 0;
-          }
-          .secret-link {
-            display: block;
-            margin-top: 1rem;
-            padding: 0.75rem 1rem;
-            background-color: #3b82f6;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: 500;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <h1>Same Hour Tomorrow</h1>
-          <p>To access the ride sharing app, use the secret link below:</p>
-          <a href="/${SECRET_ACCESS_KEY}" class="secret-link">Access App</a>
-        </div>
-      </body>
-    </html>
-  `);
-});
-
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`App available at http://localhost:${PORT}/${SECRET_ACCESS_KEY}`);
   console.log(`API available at http://localhost:${PORT}/api/data`);
 });
