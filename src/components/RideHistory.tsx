@@ -1,12 +1,23 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRideShare } from '@/context/RideShareContext';
 import { Ride, User } from '@/types/rideShare';
 import { format } from 'date-fns';
+import { Button } from './ui/button';
 
 const RideHistory = () => {
   const { rides, users, settings } = useRideShare();
+  const [showAllRides, setShowAllRides] = useState(false);
+  
+  // Sort rides by date (newest first)
+  const sortedRides = [...rides].sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+  
+  // Limit visible rides
+  const visibleRides = showAllRides ? sortedRides : sortedRides.slice(0, 5);
+  const hasMoreRides = sortedRides.length > 5;
 
   // Get user name by ID
   const getUserName = (id: string): string => {
@@ -51,7 +62,7 @@ const RideHistory = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {rides.map((ride) => (
+          {visibleRides.map((ride) => (
             <Card key={ride.id} className="overflow-hidden">
               <div className="p-4 bg-muted/50">
                 <div className="flex justify-between items-center">
@@ -89,6 +100,16 @@ const RideHistory = () => {
               </div>
             </Card>
           ))}
+          
+          {hasMoreRides && (
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              onClick={() => setShowAllRides(!showAllRides)}
+            >
+              {showAllRides ? "Show Less" : "Show More"}
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

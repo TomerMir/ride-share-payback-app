@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRideShare } from '@/context/RideShareContext';
 import { format } from 'date-fns';
@@ -9,6 +9,16 @@ import { ArrowLeft } from "lucide-react";
 
 const AllRidesHistory = () => {
   const { historicRides, users, unsettleRide } = useRideShare();
+  const [showAllRides, setShowAllRides] = useState(false);
+  
+  // Sort rides by date (newest first)
+  const sortedRides = [...historicRides].sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+  
+  // Limit visible rides
+  const visibleRides = showAllRides ? sortedRides : sortedRides.slice(0, 5);
+  const hasMoreRides = sortedRides.length > 5;
 
   // Get user name by ID
   const getUserName = (id: string): string => {
@@ -55,7 +65,7 @@ const AllRidesHistory = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {historicRides.map((ride) => (
+              {visibleRides.map((ride) => (
                 <TableRow key={ride.id}>
                   <TableCell className="font-medium">
                     {format(new Date(ride.date), 'PP')} at {format(new Date(ride.date), 'p')}
@@ -79,6 +89,16 @@ const AllRidesHistory = () => {
               ))}
             </TableBody>
           </Table>
+          
+          {hasMoreRides && (
+            <Button 
+              variant="outline" 
+              className="w-full mt-4" 
+              onClick={() => setShowAllRides(!showAllRides)}
+            >
+              {showAllRides ? "Show Less" : "Show More"}
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
