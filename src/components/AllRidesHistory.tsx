@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
 const AllRidesHistory = () => {
-  const { historicRides, users, unsettleRide } = useRideShare();
+  const { historicRides, sortedHistoricRides, users, unsettleRide } = useRideShare();
 
   // Get user name by ID
   const getUserName = (id: string): string => {
@@ -19,11 +19,6 @@ const AllRidesHistory = () => {
   const handleUnsettleRide = (rideId: string) => {
     unsettleRide(rideId);
   };
-
-  // Sort rides by date, newest first
-  const sortedRides = [...historicRides].sort((a, b) => 
-    new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
 
   if (historicRides.length === 0) {
     return (
@@ -60,7 +55,7 @@ const AllRidesHistory = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sortedRides.map((ride) => (
+              {sortedHistoricRides.map((ride) => (
                 <TableRow key={ride.id}>
                   <TableCell className="font-medium">
                     {format(new Date(ride.date), 'PP')} at {format(new Date(ride.date), 'p')}
