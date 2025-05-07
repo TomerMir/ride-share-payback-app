@@ -34,8 +34,6 @@ export type RideShareContextType = {
   users: User[];
   rides: Ride[];
   historicRides: Ride[];
-  sortedRides: Ride[];
-  sortedHistoricRides: Ride[];
   settings: SettingsType;
   currentUser: User | null;
   debts: Debt[];

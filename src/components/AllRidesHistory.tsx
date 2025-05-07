@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
 const AllRidesHistory = () => {
-  const { historicRides, sortedHistoricRides, users, unsettleRide } = useRideShare();
+  const { historicRides, users, unsettleRide } = useRideShare();
 
   // Get user name by ID
   const getUserName = (id: string): string => {
@@ -55,7 +55,7 @@ const AllRidesHistory = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sortedHistoricRides.map((ride) => (
+              {historicRides.map((ride) => (
                 <TableRow key={ride.id}>
                   <TableCell className="font-medium">
                     {format(new Date(ride.date), 'PP')} at {format(new Date(ride.date), 'p')}

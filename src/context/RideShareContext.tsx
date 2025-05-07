@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -46,23 +47,6 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setCurrentUser(users[0]);
     }
   }, [users, currentUser]);
-
-  // Function to sort rides by date, newest first
-  const sortRidesByDate = (ridesToSort: Ride[]) => {
-    return [...ridesToSort].sort((a, b) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
-  };
-
-  // Get sorted rides
-  const getSortedRides = () => {
-    return sortRidesByDate(rides);
-  };
-
-  // Get sorted historic rides
-  const getSortedHistoricRides = () => {
-    return sortRidesByDate(historicRides);
-  };
 
   const addUser = (name: string) => {
     if (!name.trim()) {
@@ -235,8 +219,6 @@ export const RideShareProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         currentUser,
         debts,
         rawDebts,
-        sortedRides: getSortedRides(),
-        sortedHistoricRides: getSortedHistoricRides(),
         addUser,
         addRide,
         updateCurrentUser,
