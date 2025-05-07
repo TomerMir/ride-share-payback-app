@@ -20,6 +20,11 @@ const AllRidesHistory = () => {
     unsettleRide(rideId);
   };
 
+  // Sort rides by date, newest first
+  const sortedRides = [...historicRides].sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+
   if (historicRides.length === 0) {
     return (
       <Card className="w-full">
@@ -55,7 +60,7 @@ const AllRidesHistory = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {historicRides.map((ride) => (
+              {sortedRides.map((ride) => (
                 <TableRow key={ride.id}>
                   <TableCell className="font-medium">
                     {format(new Date(ride.date), 'PP')} at {format(new Date(ride.date), 'p')}
